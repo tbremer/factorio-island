@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factorio Island Map</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body { overflow: hidden; }
+        body {
+            background-image: url('/whole-island.thumb.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #313031;
+            background-attachment: fixed;
+        }
+        div {
+            display: flex;
+        }
+
+        .fade-in { animation: fadeIn ease 2s; }
+        @keyframes fadeIn {
+            0% {opacity:0;}
+            100% {opacity:1;}
+        }
+        .fade-out { animation: fadeOut ease 2s; }
+        @keyframes fadeOut {
+            0% {opacity:1;}
+            100% {opacity:0;}
+        }
+
+        .dead-center {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            place-items: center;
+            height: 100vh;
+        }
+
+        .dead-center > * {
+            grid-row: 2;
+        }
+        #thumb, #full {animation-fill-mode: forwards;}
+        #full { pointer-events: none; user-select: none;}
+    </style>
+</head>
+<body>
+    <section class="dead-center" id="thumb">
+        <button onclick="view_full()" type="button">view full</button>
+    </section>
+    
+    <section id="loading" class="dead-center" style="display: none;">
+        <p><span id="percent">0</span>% loaded&hellip;</p>
+    </section>
+
+    <section id="full" class="fade-in" style="display: none;"></section>
+    
+    <script>
+    function view_full() {
+        const thumb = document.getElementById('thumb')
+        const loading = document.getElementById('loading')
+
+        thumb.style.display="none"
+        loading.removeAttribute('style');
+
+        let img_idx = -1;
+        let wrapping_count = 0;
+        let parent = document.createElement('div')
+        let load_count = 0;
+
+        function loaded() {
+            load_count++;
+
+            if (load_count >= 4095) {
+                loading.firstElementChild.textContent = "Loaded..."
+
+                setTimeout(() => {
+                    thumb.classList.add('fade-out');
+                    document.getElementById('full').removeAttribute('style')
+                    document.getElementById('full').classList.add('fade-in')
+                    document.getElementById('center').scrollIntoView({
+                        block: 'center',
+                        inline: 'center'
+                    });
+                }, 450)
+            }
+            else {
+                document.getElementById('percent').textContent = Math.round((load_count/4095) * 100)
+            }
+        }
+
+        while ((++img_idx) <= 4095) {
+            wrapping_count++;
+            const img = `/tiles/tile-${img_idx < 10 ? '0'+img_idx : img_idx}.png`;
+            const node = document.createElement('img');
+            node.src = img;
+
+            node.onload = function() {
+                loaded()
+            }
+
+            if (img_idx === 2208) {
+                node.id = 'center'
+            }
+            
+
+            parent.appendChild(node);
+
+            if (wrapping_count === 64) {
+                document.getElementById('full').appendChild(parent);
+                parent = document.createElement('div')
+                wrapping_count = 0;
+            }
+
+            // console.log({wrapping_count, img_idx})
+        }
+    }
+    </script>
+</body>
+</html>
