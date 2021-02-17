@@ -1,123 +1,436 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factorio Island Map</title>
+    <!-- <link rel="preconnect" href="https://fonts.gstatic.com"> -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600&display=swap" rel="stylesheet"> -->
     <style>
-        *, *::before, *::after {
+        :root {
+            font-size: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            color: #fff;
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        body { overflow: hidden; }
+
+        #full {
+            user-select: none;
+            /* width: 100%;
+            height: 100%;
+            overflow-x: scroll;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; */
+        }
+
+        /* @media (min-width: 768px) {
+            body {
+                overflow: hidden;
+            }
+
+            #full {
+                pointer-events: none;
+                width: auto;
+                max-height: auto;
+                overflow: auto;
+            }
+        } */
+
+
+
         body {
-            background-image: url('./whole-island.thumb.png');
+            background-image: url('./whole-island.thumb.light.png');
             background-repeat: no-repeat;
             background-position: center;
             background-color: #313031;
             background-attachment: fixed;
         }
-        div {
+
+        body.loaded {
+            pointer-events: none;
+            overflow: auto;
+        }
+
+        .flex {
             display: flex;
         }
 
-        .fade-in { animation: fadeIn ease 2s; }
-        @keyframes fadeIn {
-            0% {opacity:0;}
-            100% {opacity:1;}
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #8e8e8e;
+            padding: 10px 12px;
+            font-size: 100%;
+            text-align: left;
+            color: #000;
+            font-weight: 600;
+            display: inline-block;
+            vertical-align: baseline;
+            min-width: 128px;
+            border: none;
+            line-height: inherit;
+            white-space: nowrap;
+            box-shadow: inset 8px 0 4px -8px #000, inset -8px 0 4px -8px #000, inset 0 10px 2px -8px #e3e3e3, inset 0 10px 2px -8px #282828, inset 0 -9px 2px -8px #000, 0 0 4px 0 #000;
+            position: relative;
+            margin-right: 14px;
+            user-select: none;
+            /* height: 36px; */
+            text-align: left;
         }
-        .fade-out { animation: fadeOut ease 2s; }
+
+        .button-green {
+            background-color: #5eb663;
+            min-width: 128px;
+            border: none;
+            box-shadow: inset 8px 0 4px -8px #000, inset -8px 0 4px -8px #000, inset 0 10px 2px -8px #95df99, inset 0 10px 2px -8px #163218, inset 0 -9px 2px -8px #000, 0 0 4px 0 #000;
+        }
+
+        .button-green:hover {
+            color: #000;
+            text-decoration: none;
+            outline: 0;
+            filter: brightness(1.3) drop-shadow(0 0 2px #34be3c)
+        }
+
+        .button-green:active {
+            position: relative;
+            padding-top: 12px;
+            padding-bottom: 8px;
+            vertical-align: -2px;
+            box-shadow: inset 0 10px 2px -8px #000, inset 0 9px 2px -8px #000, inset 8px 0 4px -8px #3f5024, inset 8px 0 4px -8px #3f5024, inset 0 9px 2px -8px #3f5024, inset 0 -9px 2px -8px #3f5024, inset 0 -8.5px 0 -8px #3f5024, 0 0 4px 0 #000;
+            background-color: #cfdf93;
+            filter: none;
+            outline: 0
+        }
+
+        .button-green:focus {
+            outline: 0;
+        }
+
+        .button-right::after {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 1.5rem;
+            right: -.5rem;
+            top: 0.03125rem;
+            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAABACAMAAADCiszgAAABDlBMVEUAAAASMBURLxJJgUkAKxNKiU1Ih01msGpMjVFNjlFLik9ToFdLik9Lik9Lik5Yq1wIHgoOKhGAyoVNjVFipmY3cDpQkVVrsHB2vHlXmFyK1Y5/yoRvuHNcs2E7eT8bQB1doGFAe0IJIQxNjFJDgkhjrGgGHgxetmNcs2FasF9RllVVpllXqlxRnlVQm1RYrV0cQh5SoVcUNRdQk1VLllA8e0AXOhpQkFM0bDcqXC4jTiVRmFVFiUkIHgpTpFhNmVJEh0hNj1EtYTCI1I16w35utnJXn1tNk1FJkk1HjUs/fkI3czsyajYpWSsZPhxrsW9ZnV1XmVo6dz41bzgmUygkUCYiTSUTMRUPKxEOKRFdNbmJAAAAJ3RSTlMAVisODG41Bvb75Zfc1dGXlwb98/7y8fDS0JeXl5eXl25sVjU1MSucyRWzAAABMElEQVQ4y23M51LCUBiE4QWRKFFB7L37EUJTithI6FXs7f5vxDgok3Oy+/OdZxbGdrOZ3DyDOmMn2WptHM5odbfdflzdOtGq2ek8Pa/Pqtg0nVK3eLUUVWrcvsil08UVFaeszG/WsKQsT+tYJJW3s7caFpl8FOf8WKZ40YeFYqFYKBaKhWLx44V/LBQLxaLg+T8sFAvFouFYdFIZFoqFYqFYArjuYQngeuwUEsB19wii4lqu2x+s6dXO9QavDa1atuMOG2+Bh1658VFQq5XJutX3cQjaQal8XbgMQ6N31ZtKKAJKQSkoBaWgFJSCUlAKSkEpKAWloBSUglJQCkpBKSgFpdiz8rUARTxec9yRRmGYTv/lQaMw9ocjL6oUywfjyufXdxhqTdx7O46QmjhX4w9Fq5Q/daB+bwAAAABJRU5ErkJggg==);
+            background-repeat: no-repeat;
+            background-position: 100% 0%;
+            background-size: contain;
+        }
+
+        .button-right:active::after {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 24px;
+            right: -10px;
+            top: 0;
+            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAABACAMAAADCiszgAAACBFBMVEUAAACWq1clPgwnPRChwmOhv18iOQ4iOhEdLwwhNBAkOA8jOQ4iNBAkPBSJolSUs1t1ij4kNA4MHwAhLwwhMw0hMQ+Fn0+Jp16Xt14aLA0kOxQlPBR5jkAnOBMqOhYVJQYOIgMcLgsLHQIoPRgZKQoiOBEkOxF4jj6SsFkLGwMlORdOYCRleS4/UB9ohU8xRR3P35PD5ovO3pHM3ZDK243A1IXG2Iq4zX7N4JLM4ZHL4pDJ4o+ev2nH44/F5I6guGoxRxitw3WBmlNxiUZOZS294YW12H0+VCKqzXOcvGWSqmBedjmevmSRqV9geDoQIQIJGgLJ346v0nquxHUmMSMEEQTF4Y3B44mtzom+3IegwoSVt3+etWlwj2KKpld+llJ/mVFuhUQ6TiLH2oq704nA24e21Ya73oW73oOz1X210n2oy3Klxm6lvW6Lq22YuWWaumSUs2KYt2CQpl6Rr1yLqFuNplqBnFF0jEN2kEJeci9MYi1LYCtBVCU9UyItQBguQxccKBLK3Y3C2onD1YfC2IWrzYS22YC6z32bvny1ynu10HigwnaoyHOpx22brmmjv2WWtWGMq2GPr196lV2AnFprh1iSrlZ4k1ZuilaLp1F4kEpyikhmfUF1jEBdcD5acjdUZzdtgjZacDNNYi5HWy0zQyg4TCYoNx4pOxsmMRogMA46/ea2AAAAMHRSTlMADhT7YTLolBhR/O2XTTk1Ev779vKcbWxlVk5MPv76+Ovpp6CclpRzZ15aVU5JRxpOaUmtAAAB4klEQVQ4y23Q5VuTcRTG8VtRBKQEAxS7++BgM6YOwYBJbOo6AQnp7rK7u5v6J3keHsbO2fW7X36vz4tzHVRryzmIhNVoy9mVArkb2mp25ENuZm5qqnr7ngT849e/6dn5namyvugJf/trS0tfKWqxpa0/OjqZnCFq0d3HgbB9PGmfwCeKiksqS8tsyVt4JZPZcv6C/XLSGo5JiUmJKY4zWFViUmJSYlrCFRpeu5lXA1cxTEpMAu9dwiRxarzGcezPtIyvVXwts603MAk8npaeYlSGS0cmDUwcR+y16zbomDiujI5O5ObrleNA+KeBieOSnujIRO4hrTJcZwlEqsa27j6uV3HGlz+1246CeK572NY/NDx2WNbb9568/Px9+Iio5Lh56/mHod8Fop7UamtocH+2qKcc3mbrwGABwOlpl9fZFdmYDXB6xtX4rG8gEwCnZ90PrCGdgtNzbmdXSKfgtLCptffACr1yWtjc0ZsFfZxebHmVt0jB6SVrt0HB6ZXOVQaFoOWrYYzT8hgFp1djFEoKJYWSQkmhpFBSKCmUFCaTw+VuaukUFGbzHW+js6NbUNTXNzQ4rW/yBIXH47n/9HVfFsR8Pt+j9nebJIXf729/+zETcsFg8P2nRIrr2v4fg9wCPnjQTyTwM1IAAAAASUVORK5CYII=);
+            background-repeat: no-repeat;
+            background-position: 100% 0%;
+            background-size: contain
+        }
+
+        .panel {
+            max-width: 30rem;
+            margin: 0 auto;
+            background-color: #313031;
+            box-shadow: inset 3px 0 3px -3px #201815, inset 2px 0 2px -2px #201815, inset 1px 0 1px -1px #201815, inset 0 3px 3px -3px #8f8c8b, inset 0 2px 2px -2px #8f8c8b, inset 0 1px 1px -1px #8f8c8b, inset -3px 0 3px -3px #201815, inset -2px 0 2px -2px #201815, inset -2px 0 1px -1px #201815, inset 0 -3px 3px -3px #000, inset 0 -2px 2px -2px #000, inset 0 -1px 1px -1px #000, 0 0 2px 0 #201815, 0 0 4px 0 #201815;
+        }
+
+        .panel,
+        .panel-inset {
+            background-color: #313031;
+            border: none;
+            padding: 12px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            padding: 12px;
+        }
+
+        .panel-inset {
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 3px 0 #000, 0 -2px 2px -1px #000, -2px 0 2px -2px #28221f, -2px 0 2px -2px #28221f, 2px 0 2px -2px #28221f, 2px 0 2px -2px #28221f, 0 3px 3px -3px #8f8c8b, 0 2px 2px -2px #8f8c8b, 0 1px 1px -1px #8f8c8b;
+            background-color: #414040;
+        }
+
+        .panel-inset>* {
+            margin-top: 1rem;
+        }
+
+        .panel-inset> :first-child {
+            margin-top: 0;
+        }
+
+        @supports (display: flex; gap: 1rem)
+
+        /* with (display: flex) */
+            {
+            .panel-inset {
+                gap: 1rem;
+            }
+
+            .panel-inset>* {
+                margin-top: 0;
+            }
+        }
+
+        h2 {
+            cursor: default;
+            margin-bottom: 12px;
+            font-size: 120%;
+            color: #ffe6c0;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .fade-in {
+            animation: fadeIn ease 2s;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .fade-out {
+            animation: fadeOut ease 2s;
+        }
+
         @keyframes fadeOut {
-            0% {opacity:1;}
-            100% {opacity:0;}
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
 
         .dead-center {
+            position: absolute;
             display: grid;
             grid-template-rows: repeat(3, 1fr);
             place-items: center;
-            height: 100vh;
+            height: 100%;
+            width: 100%;
         }
 
-        .dead-center > * {
+        .dead-center>* {
             grid-row: 2;
         }
-        #thumb, #full {animation-fill-mode: forwards;}
-        #full { pointer-events: none; user-select: none;}
+
+        .padded {
+            padding: 0 1rem;
+        }
+
+        #thumb,
+        #full {
+            animation-fill-mode: forwards;
+        }
     </style>
 </head>
+
 <body>
-    <section class="dead-center" id="thumb">
-        <button onclick="view_full()" type="button">view full</button>
+    <section class="dead-center padded" id="thumb">
+        <div class="panel">
+            <h2>About</h2>
+            <div class="panel-inset">
+                <p>This is a map from the first time I launched a rocket in Factorio.</p>
+
+                <p>Click View Full Map to load the complete map, be warned it is roughly 300mb of images.</p>
+
+                <p>You can navigate with WASD, scroll, or touch if on a mobile device.</p>
+
+                <button class="button button-green button-right" onclick="view_full()" type="button">View Full
+                    Map</button>
+            </div>
+        </div>
     </section>
-    
+
     <section id="loading" class="dead-center" style="display: none;">
         <p><span id="percent">0</span>% loaded&hellip;</p>
     </section>
 
     <section id="full" class="fade-in" style="display: none;"></section>
-    
+
     <script>
-    function view_full() {
-        const thumb = document.getElementById('thumb')
-        const loading = document.getElementById('loading')
+        const isSafari = navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1;
 
-        thumb.style.display="none"
-        loading.removeAttribute('style');
-
-        let img_idx = -1;
-        let wrapping_count = 0;
-        let parent = document.createElement('div')
-        let load_count = 0;
-
-        function loaded() {
-            load_count++;
-
-            if (load_count >= 4095) {
-                loading.firstElementChild.textContent = "Loaded..."
-
-                setTimeout(() => {
-                    thumb.classList.add('fade-out');
-                    document.getElementById('full').removeAttribute('style')
-                    document.getElementById('full').classList.add('fade-in')
-                    document.getElementById('center').scrollIntoView({
-                        block: 'center',
-                        inline: 'center'
-                    });
-                }, 450)
-            }
-            else {
-                document.getElementById('percent').textContent = Math.round((load_count/4095) * 100)
-            }
+        function attach_listeners() {
+            add_wasd();
+            // add_touch();
         }
 
-        while ((++img_idx) <= 4095) {
-            wrapping_count++;
-            const img = `./tiles/tile-${img_idx < 10 ? '0'+img_idx : img_idx}.png`;
-            const node = document.createElement('img');
-            node.src = img;
-
-            node.onload = function() {
-                loaded()
+        function add_touch() {
+            const scroll = {
+                top: null,
+                left: null,
+                behavior: 'smooth'
             }
+            window.addEventListener('touchstart', () => {
+                scroll.top = document.documentElement.scrollTop;
+                scroll.left = document.documentElement.scrollLeft;
+            });
 
-            if (img_idx === 2208) {
-                node.id = 'center'
-            }
-            
-
-            parent.appendChild(node);
-
-            if (wrapping_count === 64) {
-                document.getElementById('full').appendChild(parent);
-                parent = document.createElement('div')
-                wrapping_count = 0;
-            }
-
-            // console.log({wrapping_count, img_idx})
+            window.addEventListener('touchmove', evt => {
+                console.group('move');
+                console.log('scroll =>', scroll);
+                console.log('evt =>', evt)
+                console.groupEnd()
+            })
         }
-    }
+
+        function add_wasd() {
+            const keys_pressed = {
+                w: false,
+                a: false,
+                s: false,
+                d: false,
+            }
+            document.addEventListener('keydown', ({ key }) => {
+                if (key in keys_pressed) {
+                    keys_pressed[key] = true
+                }
+            })
+            document.addEventListener('keyup', ({ key }) => {
+                if (key in keys_pressed) {
+                    keys_pressed[key] = false
+                }
+            })
+            document.addEventListener('keypress', () => {
+                const offset = 60;
+                const scroll = {
+                    top: document.documentElement.scrollTop,
+                    left: document.documentElement.scrollLeft,
+                    behavior: 'smooth',
+                }
+
+                for (k in keys_pressed) {
+                    if (keys_pressed[k]) {
+                        switch (k) {
+                            case "w": {
+                                scroll.top = Math.max(0, scroll.top - offset);
+                                break;
+                            }
+                            case "a": {
+                                scroll.left = Math.max(0, scroll.left - offset);
+                                break;
+                            }
+                            case "s": {
+                                scroll.top = Math.min(document.body.scrollHeight, scroll.top + offset);
+                                break;
+                            }
+                            case "d": {
+                                scroll.left = Math.min(document.body.scrollWidth, scroll.left + offset);
+                                break;
+                            }
+                            default: { }
+                        }
+                    }
+                }
+
+                requestAnimationFrame(() => { window.scrollTo(scroll) })
+            })
+        }
+
+        function view_full() {
+            const thumb = document.getElementById('thumb')
+            const loading = document.getElementById('loading')
+            const full = document.getElementById('full')
+
+            thumb.style.display = "none"
+            loading.removeAttribute('style');
+
+            let img_idx = -1;
+            let wrapping_count = 0;
+            let parent = document.createElement('div')
+            let load_count = 0;
+
+            function loaded() {
+                load_count++;
+
+                if (load_count >= 4095) {
+                    loading.firstElementChild.textContent = "Loaded!"
+
+                    setTimeout(() => {
+                        thumb.classList.add('fade-out');
+                        full.removeAttribute('style')
+                        full.classList.add('fade-in')
+
+                        full.onanimationend = () => {
+                            thumb.remove();
+                            loading.remove();
+                            document.body.classList.add('loaded')
+                        }
+
+                        if (isSafari) {
+                            requestAnimationFrame(() => {
+                                document.getElementById('center').scrollIntoView()
+                            })
+                        }
+                        else {
+                            document.getElementById('center').scrollIntoView({
+                                block: 'center',
+                                inline: 'center',
+                                behavior: 'smooth'
+                            });
+                        }
+
+                        attach_listeners()
+                    }, 450)
+                }
+                else {
+                    document.getElementById('percent').textContent = Math.round((load_count / 4095) * 100)
+                }
+            }
+
+            setTimeout(() => {
+                while ((++img_idx) <= 4095) {
+                    wrapping_count++;
+                    const img = `./tiles/tile-${img_idx < 10 ? '0' + img_idx : img_idx}.png`;
+                    const node = document.createElement('img');
+                    node.src = img;
+
+                    node.onload = function () {
+                        loaded()
+                    }
+
+                    if (img_idx === 2208) {
+                        node.id = 'center'
+                    }
+
+
+                    parent.appendChild(node);
+
+                    if (wrapping_count === 64) {
+                        parent.classList.add('flex');
+                        document.getElementById('full').appendChild(parent);
+                        parent = document.createElement('div')
+                        wrapping_count = 0;
+                    }
+                }
+            })
+        }
     </script>
 </body>
+
 </html>
