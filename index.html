@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--   test   -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +12,7 @@
         }
         body { overflow: hidden; }
         body {
-            background-image: url('/whole-island.thumb.png');
+            background-image: url('./whole-island.thumb.png');
             background-repeat: no-repeat;
             background-position: center;
             background-color: #313031;
@@ -95,7 +94,7 @@
 
         while ((++img_idx) <= 4095) {
             wrapping_count++;
-            const img = `/tiles/tile-${img_idx < 10 ? '0'+img_idx : img_idx}.png`;
+            const img = `./tiles/tile-${img_idx < 10 ? '0'+img_idx : img_idx}.png`;
             const node = document.createElement('img');
             node.src = img;
 
